@@ -1,4 +1,5 @@
 import jwt
+import warnings
 
 from datetime import datetime
 
@@ -22,6 +23,12 @@ def jwt_payload_handler(user):
     except AttributeError:
         username = user.username
 
+    warnings.warn(
+        'The following fields will be removed in the future: '
+        '`email` and `user_id`.',
+        DeprecationWarning
+    )
+
     return {
         'user_id': user.pk,
         'email': user.email,
@@ -34,8 +41,20 @@ def jwt_get_user_id_from_payload_handler(payload):
     """
     Override this function if user_id is formatted differently in payload
     """
-    user_id = payload.get('user_id')
-    return user_id
+    warnings.warn(
+        'The following will be removed in the future. '
+        'Use `JWT_PAYLOAD_GET_USERNAME_HANDLER` instead.',
+        DeprecationWarning
+    )
+
+    return payload.get('user_id')
+
+
+def jwt_get_username_from_payload_handler(payload):
+    """
+    Override this function if username is formatted differently in payload
+    """
+    return payload.get('username')
 
 
 def jwt_encode_handler(payload):
